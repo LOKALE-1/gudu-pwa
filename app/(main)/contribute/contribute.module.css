@@ -1,0 +1,204 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 16px;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (min-width: 768px) { .page { padding: 32px; } }
+
+/* ─── Back ──────────────────────────────────────────────────────────────────── */
+.backBtn {
+  display: flex; align-items: center; gap: 8px;
+  background: none; border: none;
+  color: rgba(255,255,255,0.55); font-size: 0.875rem; font-weight: 500;
+  cursor: pointer; padding: 0; margin-bottom: 32px;
+  font-family: inherit; transition: color 0.15s;
+}
+.backBtn:hover { color: #fff; }
+
+/* ─── Heading ───────────────────────────────────────────────────────────────── */
+.heading { margin-bottom: 32px; }
+.title { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 6px; }
+.subtitle { font-size: 0.875rem; color: rgba(255,255,255,0.50); line-height: 1.5; }
+
+/* ─── Amount input card ─────────────────────────────────────────────────────── */
+.amountCard {
+  border-radius: 20px;
+  background: rgba(239,191,129,0.06);
+  border: 1.5px solid rgba(239,191,129,0.18);
+  padding: 28px 24px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.amountLabel {
+  font-size: 0.75rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.10em;
+  color: rgba(239,191,129,0.65);
+}
+
+.amountRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.currencySymbol {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: rgba(239,191,129,0.60);
+  line-height: 1;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.amountInput {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: #fff;
+  font-family: inherit;
+  text-align: center;
+  width: 100%;
+  max-width: 240px;
+  caret-color: #EFBF81;
+}
+.amountInput::placeholder { color: rgba(255,255,255,0.15); }
+.amountInput::-webkit-outer-spin-button,
+.amountInput::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.amountInput[type=number] { -moz-appearance: textfield; }
+
+.amountHint {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.30);
+  text-align: center;
+}
+
+/* ─── Info row (stokvel name) ───────────────────────────────────────────────── */
+.infoRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 28px;
+}
+.infoKey {
+  font-size: 0.8125rem;
+  color: rgba(255,255,255,0.45);
+}
+.infoValue {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.80);
+}
+
+/* ─── Error ─────────────────────────────────────────────────────────────────── */
+.error {
+  background: rgba(239,68,68,0.10); border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 12px; padding: 12px 16px;
+  font-size: 0.875rem; color: #EF4444;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* ─── Submit ────────────────────────────────────────────────────────────────── */
+.submitBtn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; height: 58px; border-radius: 9999px;
+  font-size: 1rem; font-weight: 700; border: none; cursor: pointer;
+  transition: background-color 0.15s, transform 0.1s; font-family: inherit;
+}
+.submitBtn.active { background: #EFBF81; color: #070402; }
+.submitBtn.active:hover { background: #DCA460; }
+.submitBtn.active:active { transform: scale(0.98); }
+.submitBtn.dimmed { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.25); cursor: not-allowed; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  width: 20px; height: 20px; border-radius: 9999px;
+  border: 2.5px solid rgba(7,4,2,0.25); border-top-color: #070402;
+  animation: spin 0.75s linear infinite;
+}
+.spinnerGold {
+  width: 24px; height: 24px; border-radius: 9999px;
+  border: 2.5px solid rgba(239,191,129,0.20); border-top-color: #EFBF81;
+  animation: spin 0.75s linear infinite;
+}
+
+/* ─── Status states ─────────────────────────────────────────────────────────── */
+.statusWrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  text-align: center;
+  padding: 40px 0;
+}
+
+.statusIcon {
+  width: 72px; height: 72px; border-radius: 9999px;
+  display: flex; align-items: center; justify-content: center;
+}
+.statusIcon.processing {
+  background: rgba(239,191,129,0.12);
+  color: #EFBF81;
+}
+.statusIcon.success {
+  background: rgba(16,185,129,0.12);
+  color: #10B981;
+}
+.statusIcon.failed {
+  background: rgba(239,68,68,0.12);
+  color: #EF4444;
+}
+
+.statusTitle {
+  font-size: 1.25rem; font-weight: 800; color: #fff;
+}
+.statusSub {
+  font-size: 0.875rem; color: rgba(255,255,255,0.50); line-height: 1.6;
+  max-width: 280px;
+}
+
+.statusAmount {
+  font-size: 2rem; font-weight: 800;
+  color: #EFBF81;
+}
+
+.doneBtn {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 56px; border-radius: 9999px;
+  background: #EFBF81; color: #070402;
+  font-size: 0.9375rem; font-weight: 700;
+  border: none; cursor: pointer; font-family: inherit;
+  transition: background-color 0.15s;
+}
+.doneBtn:hover { background: #DCA460; }
+
+.retryBtn {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; height: 56px; border-radius: 9999px;
+  background: rgba(239,68,68,0.12); color: #EF4444;
+  border: 1px solid rgba(239,68,68,0.25);
+  font-size: 0.9375rem; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  transition: background-color 0.15s;
+}
+.retryBtn:hover { background: rgba(239,68,68,0.20); }

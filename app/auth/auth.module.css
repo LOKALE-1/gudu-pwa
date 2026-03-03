@@ -1,0 +1,16 @@
+/* Auth shell — full-height, dark, centres content on desktop */
+.shell {
+  min-height: 100dvh;
+  background: #070402;
+  display: flex;
+  flex-direction: column;
+}
+
+.inner {
+  width: 100%;
+  max-width: 448px;
+  margin: 0 auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}

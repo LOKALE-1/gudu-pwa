@@ -1,0 +1,102 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 24px 16px;
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .page { padding: 48px 32px; }
+}
+
+/* ─── Greeting ──────────────────────────────────────────────────────────────── */
+.greeting { margin-bottom: 32px; }
+.greetSub {
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.50);
+  margin-bottom: 2px;
+}
+.greetName {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+/* ─── Empty card ────────────────────────────────────────────────────────────── */
+.emptyCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 32px 24px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 24px;
+}
+.emptyIconWrap {
+  width: 56px; height: 56px;
+  border-radius: 9999px;
+  background: rgba(239,191,129,0.12);
+  display: flex; align-items: center; justify-content: center;
+  color: #EFBF81;
+  margin-bottom: 8px;
+}
+.emptyTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #fff;
+}
+.emptySub {
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.50);
+  line-height: 1.5;
+  max-width: 280px;
+}
+
+/* ─── Action cards ──────────────────────────────────────────────────────────── */
+.actionGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.actionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 28px 16px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, transform 0.1s;
+}
+.actionCard:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(239,191,129,0.35);
+}
+.actionCard:active { transform: scale(0.97); }
+.cardIconWrap {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  background: rgba(239,191,129,0.12);
+  display: flex; align-items: center; justify-content: center;
+  color: #EFBF81;
+}
+.cardTitle {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #fff;
+}
+.cardSub {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.4;
+}

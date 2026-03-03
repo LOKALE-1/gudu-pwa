@@ -1,0 +1,181 @@
+.page {
+  padding: 20px 16px 100px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.50);
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 20px;
+}
+.backBtn:hover { color: #fff; }
+
+.denied {
+  color: rgba(255,255,255,0.45);
+  font-size: 15px;
+  text-align: center;
+  padding: 60px 20px;
+}
+
+/* ── Header ────────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.avatar {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: rgba(239,191,129,0.18);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.avatarLetter { font-size: 18px; font-weight: 700; color: #EFBF81; }
+.name { font-size: 20px; font-weight: 700; color: #fff; margin: 0 0 2px; }
+.nameSub { font-size: 13px; color: rgba(255,255,255,0.40); margin: 0; }
+
+/* ── Total card ────────────────────────────────────────────────────────────── */
+.totalCard {
+  background: rgba(16,185,129,0.08);
+  border: 1px solid rgba(16,185,129,0.20);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+.totalLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.40);
+  margin: 0 0 8px;
+}
+.totalAmount {
+  font-size: 32px;
+  font-weight: 800;
+  color: #10B981;
+  margin: 0 0 6px;
+}
+.totalSub {
+  font-size: 12px;
+  color: rgba(255,255,255,0.35);
+  margin: 0;
+}
+
+/* ── Skeleton ──────────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeletonList { display: flex; flex-direction: column; gap: 10px; }
+.skeletonItem {
+  height: 72px;
+  border-radius: 14px;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+/* ── Empty state ───────────────────────────────────────────────────────────── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 20px;
+  text-align: center;
+  border: 1px dashed rgba(255,255,255,0.10);
+  border-radius: 16px;
+}
+.emptyIcon {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.25);
+}
+.emptyText { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.40); margin: 0; }
+.emptyHint { font-size: 13px; color: rgba(255,255,255,0.25); margin: 0; }
+
+/* ── Section label ─────────────────────────────────────────────────────────── */
+.sectionLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.30);
+  margin: 0 0 10px 2px;
+}
+
+/* ── Earning list ──────────────────────────────────────────────────────────── */
+.list { display: flex; flex-direction: column; gap: 10px; }
+
+.earningItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.earningIcon {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.iconCredit { background: rgba(16,185,129,0.14); color: #10B981; }
+.iconShare  { background: rgba(239,191,129,0.14); color: #EFBF81; }
+
+.earningBody { flex: 1; min-width: 0; }
+.earningTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 2px;
+}
+.earningMeta {
+  font-size: 12px;
+  color: rgba(255,255,255,0.40);
+  margin: 0 0 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.earningDate { font-size: 11px; color: rgba(255,255,255,0.25); margin: 0; }
+
+.earningRight { text-align: right; flex-shrink: 0; }
+.earningAmount {
+  font-size: 15px;
+  font-weight: 700;
+  color: #10B981;
+  margin: 0 0 4px;
+}
+.typeBadge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 7px;
+  border-radius: 9999px;
+}
+.badgeCredit { background: rgba(16,185,129,0.15); color: #10B981; }
+.badgeShare  { background: rgba(239,191,129,0.15); color: #EFBF81; }

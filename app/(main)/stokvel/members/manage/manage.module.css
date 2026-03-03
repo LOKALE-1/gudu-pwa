@@ -1,0 +1,276 @@
+.page {
+  padding: 20px 16px 100px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.50);
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 20px;
+}
+.backBtn:hover { color: #fff; }
+
+.heading { margin-bottom: 20px; }
+.title { font-size: 22px; font-weight: 700; color: #fff; margin: 0 0 4px; }
+.subtitle { font-size: 13px; color: rgba(255,255,255,0.45); margin: 0; }
+
+.denied { color: rgba(255,255,255,0.50); font-size: 15px; text-align: center; padding: 40px 0; }
+
+.errorBanner {
+  background: rgba(239,68,68,0.12);
+  border: 1px solid rgba(239,68,68,0.25);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #EF4444;
+  margin-bottom: 16px;
+}
+
+/* ── Skeleton ──────────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeletonList { display: flex; flex-direction: column; gap: 12px; }
+.skeletonItem {
+  height: 120px;
+  border-radius: 16px;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+.emptyState { padding: 48px 0; text-align: center; }
+.emptyText { color: rgba(255,255,255,0.35); font-size: 14px; }
+
+/* ── Member list ───────────────────────────────────────────────────────────── */
+.list { display: flex; flex-direction: column; gap: 12px; }
+
+.memberCard {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ── Card top row ──────────────────────────────────────────────────────────── */
+.cardTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatarBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.avatar {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.avatarCreator { background: rgba(239,191,129,0.20); }
+.avatarAdmin   { background: rgba(96,165,250,0.18); }
+.avatarMember  { background: rgba(255,255,255,0.08); }
+
+.avatarLetter {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.cardInfo { flex: 1; min-width: 0; }
+
+.memberName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.youTag { color: rgba(255,255,255,0.35); font-weight: 400; }
+
+.roleBadge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+.badgeCreator { background: rgba(239,191,129,0.18); color: #EFBF81; }
+.badgeAdmin   { background: rgba(96,165,250,0.18);  color: #60a5fa; }
+.badgeMember  { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.50); }
+
+.tapChevron { color: rgba(255,255,255,0.20); cursor: pointer; flex-shrink: 0; }
+
+/* ── Stats row ─────────────────────────────────────────────────────────────── */
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.statChip {
+  background: rgba(255,255,255,0.04);
+  border-radius: 10px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.statChipLabel {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255,255,255,0.30);
+}
+.statChipValue {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+.statGreen { color: #10B981; }
+.statRed   { color: #EF4444; }
+
+/* ── Action row ────────────────────────────────────────────────────────────── */
+.actionRow {
+  display: flex;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+
+.appointBtn {
+  flex: 2;
+  padding: 9px;
+  border-radius: 10px;
+  border: 1px solid rgba(96,165,250,0.35);
+  background: rgba(96,165,250,0.10);
+  color: #60a5fa;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.appointBtn:hover:not(:disabled) { background: rgba(96,165,250,0.18); }
+.appointBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.demoteBtn {
+  flex: 2;
+  padding: 9px;
+  border-radius: 10px;
+  border: 1px solid rgba(239,191,129,0.30);
+  background: rgba(239,191,129,0.08);
+  color: #EFBF81;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.demoteBtn:hover:not(:disabled) { background: rgba(239,191,129,0.15); }
+.demoteBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.removeBtn {
+  flex: 1;
+  padding: 9px;
+  border-radius: 10px;
+  border: 1px solid rgba(239,68,68,0.30);
+  background: transparent;
+  color: #EF4444;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.removeBtn:hover:not(:disabled) { background: rgba(239,68,68,0.10); }
+.removeBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Remove confirmation dialog ────────────────────────────────────────────── */
+.dialogOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+.dialog {
+  width: 100%;
+  max-width: 360px;
+  background: #1a1a2e;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.dialogTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+}
+.dialogBody {
+  font-size: 14px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.5;
+  margin: 0;
+}
+.dialogBody strong { color: #fff; }
+.dialogActions { display: flex; gap: 10px; }
+.dialogCancel {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: transparent;
+  color: rgba(255,255,255,0.60);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+.dialogConfirm {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  background: #EF4444;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+.dialogConfirm:hover { opacity: 0.88; }

@@ -1,0 +1,206 @@
+/* ─── App shell ──────────────────────────────────────────────────────────────── */
+.shell {
+  display: flex;
+  min-height: 100dvh;
+  background: #070402;
+}
+
+/* ─── Desktop sidebar (hidden on mobile) ─────────────────────────────────────── */
+.sidebar {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 256px;
+    flex-shrink: 0;
+    border-right: 1px solid rgba(255,255,255,0.05);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+}
+
+/* ─── Sidebar logo ───────────────────────────────────────────────────────────── */
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.logoIcon {
+  width: 32px; height: 32px;
+  border-radius: 9999px;
+  background: rgba(239,191,129,0.10);
+  display: flex; align-items: center; justify-content: center;
+  color: #EFBF81;
+  flex-shrink: 0;
+}
+.logoText {
+  font-weight: 800;
+  font-size: 1.125rem;
+  color: #fff;
+}
+
+/* ─── Sidebar nav ────────────────────────────────────────────────────────────── */
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 12px;
+  flex: 1;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.15s, color 0.15s;
+  color: rgba(255,255,255,0.50);
+}
+.navLink:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.05);
+}
+.navLink.active {
+  background: rgba(239,191,129,0.10);
+  color: #EFBF81;
+}
+
+/* ─── Profile badge (bottom of sidebar) ─────────────────────────────────────── */
+.profileBadgeWrap {
+  padding: 12px;
+  padding-bottom: 16px;
+}
+.profileBadge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+.profileAvatar {
+  width: 32px; height: 32px;
+  border-radius: 9999px;
+  background: rgba(239,191,129,0.20);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.profileAvatarLetter {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #EFBF81;
+}
+.profileInfo { min-width: 0; }
+.profileName {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.profileRole {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.40);
+  text-transform: capitalize;
+}
+
+/* ─── Main content area ──────────────────────────────────────────────────────── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-bottom: 80px; /* space for mobile nav */
+}
+
+@media (min-width: 768px) {
+  .main {
+    padding-bottom: 0;
+  }
+}
+
+/* ─── Loading screen ─────────────────────────────────────────────────────────── */
+.loading {
+  display: flex;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  background: #070402;
+}
+
+/* ─── Mobile bottom nav (hidden on desktop) ──────────────────────────────────── */
+.mobileNav {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  left: 0; right: 0;
+  z-index: 50;
+  background: rgba(13,10,7,0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255,255,255,0.10);
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 8px;
+  height: 64px;
+}
+
+@media (min-width: 768px) {
+  .mobileNav { display: none; }
+}
+
+.mobileNavLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 4px;
+  min-width: 56px;
+  text-decoration: none;
+  color: rgba(255,255,255,0.40);
+  transition: color 0.15s;
+}
+.mobileNavLink:hover { color: rgba(255,255,255,0.70); }
+.mobileNavLink.active { color: #EFBF81; }
+
+/* Pill background wraps only the icon on the active tab */
+.mobileNavIcon {
+  width: 48px;
+  height: 30px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.mobileNavLink.active .mobileNavIcon {
+  background: rgba(239,191,129,0.18);
+}
+
+.mobileNavLabel {
+  font-size: 0.625rem;
+  font-weight: 600;
+}
+
+/* ─── Spinner ────────────────────────────────────────────────────────────────── */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.spinner {
+  width: 32px; height: 32px;
+  border-radius: 9999px;
+  border: 2px solid rgba(239,191,129,0.30);
+  border-top-color: #EFBF81;
+  animation: spin 1s linear infinite;
+}

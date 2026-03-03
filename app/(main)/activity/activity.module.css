@@ -1,0 +1,277 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 16px 16px 100px;
+  max-width: 672px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .page { padding: 32px 32px 100px; }
+}
+
+/* ─── Heading ─────────────────────────────────────────────────────────────── */
+.heading { margin-bottom: 20px; padding-top: 8px; }
+.title   { font-size: 1.5rem; font-weight: 800; color: #fff; margin: 0; }
+.subtitle { font-size: 0.875rem; color: rgba(255,255,255,0.50); margin: 4px 0 0; }
+
+/* ─── Tabs ────────────────────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 20px;
+}
+.tab {
+  flex: 1;
+  padding: 9px 6px;
+  border: none;
+  background: transparent;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.45);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  font-family: inherit;
+}
+.tabActive {
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+}
+
+/* ─── Skeleton ────────────────────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeletonList { display: flex; flex-direction: column; gap: 10px; }
+.skeletonItem {
+  height: 70px;
+  border-radius: 14px;
+  background: linear-gradient(90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+/* ─── Generic list ────────────────────────────────────────────────────────── */
+.list { display: flex; flex-direction: column; gap: 10px; }
+
+/* ─── Transactions tab ────────────────────────────────────────────────────── */
+.item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.itemIcon {
+  width: 42px; height: 42px; border-radius: 9999px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.itemIcon.completed  { background: rgba(16,185,129,0.12); color: #10B981; }
+.itemIcon.processing { background: rgba(239,191,129,0.12); color: #EFBF81; }
+.itemIcon.pending    { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.40); }
+.itemIcon.failed     { background: rgba(239,68,68,0.12); color: #EF4444; }
+
+.itemBody  { flex: 1; min-width: 0; }
+.itemTitle {
+  font-size: 0.9375rem; font-weight: 600; color: #fff;
+  margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.itemDate  { font-size: 0.75rem; color: rgba(255,255,255,0.38); }
+.itemRight { text-align: right; flex-shrink: 0; }
+.itemAmount { font-size: 0.9375rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+
+.statusBadge {
+  display: inline-block; font-size: 0.6875rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 2px 8px; border-radius: 9999px;
+}
+.statusBadge.completed  { background: rgba(16,185,129,0.15); color: #10B981; }
+.statusBadge.processing { background: rgba(239,191,129,0.15); color: #EFBF81; }
+.statusBadge.pending    { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.50); }
+.statusBadge.failed     { background: rgba(239,68,68,0.12); color: #EF4444; }
+
+/* ─── Members tab ─────────────────────────────────────────────────────────── */
+.memberCount {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.30);
+  margin: 0 0 12px 2px;
+}
+
+.memberRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.memberRow:hover { background: rgba(255,255,255,0.07); }
+
+.memberAvatar {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.avatarCreator { background: rgba(239,191,129,0.18); }
+.avatarAdmin   { background: rgba(96,165,250,0.18); }
+.avatarMember  { background: rgba(255,255,255,0.08); }
+
+.memberAvatarLetter { font-size: 15px; font-weight: 700; color: #fff; }
+
+.memberRowBody { flex: 1; min-width: 0; }
+.memberRowName {
+  font-size: 0.9375rem; font-weight: 600; color: #fff;
+  margin: 0 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.memberRowSub { font-size: 0.75rem; color: rgba(255,255,255,0.40); margin: 0; }
+
+.memberRowRight {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0;
+}
+.memberRoleBadge {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; padding: 2px 7px; border-radius: 9999px;
+}
+.badgeCreator { background: rgba(239,191,129,0.18); color: #EFBF81; }
+.badgeAdmin   { background: rgba(96,165,250,0.18);  color: #60a5fa; }
+.badgeMember  { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.45); }
+.memberChevron { color: rgba(255,255,255,0.20); }
+
+/* ─── Loans tab — filter chips ────────────────────────────────────────────── */
+.filterScroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  scrollbar-width: none;
+}
+.filterScroll::-webkit-scrollbar { display: none; }
+
+.filterChip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: transparent;
+  color: rgba(255,255,255,0.50);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.filterChip:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.75); }
+.filterChipActive {
+  background: rgba(239,191,129,0.15);
+  border-color: rgba(239,191,129,0.40);
+  color: #EFBF81;
+}
+.filterCount {
+  background: rgba(255,255,255,0.10);
+  border-radius: 9999px;
+  padding: 0 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.50);
+  min-width: 18px;
+  text-align: center;
+}
+.filterChipActive .filterCount {
+  background: rgba(239,191,129,0.25);
+  color: #EFBF81;
+}
+
+/* ─── Loans tab — loan cards ──────────────────────────────────────────────── */
+.loanCard {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.loanCardOverdue {
+  border-color: rgba(239,68,68,0.30);
+  background: rgba(239,68,68,0.04);
+}
+
+.loanCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.loanAmount { font-size: 20px; font-weight: 700; color: #fff; margin: 0 0 2px; }
+.loanMember { font-size: 13px; color: rgba(255,255,255,0.50); margin: 0 0 2px; }
+.loanMeta   { font-size: 12px; color: rgba(255,255,255,0.35); margin: 0; }
+
+.loanBadge {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; padding: 4px 10px; border-radius: 9999px;
+  white-space: nowrap; flex-shrink: 0;
+}
+/* Status colours matching loans page */
+.s_pending   { background: rgba(251,191,36,0.15);  color: #fbbf24; }
+.s_approved  { background: rgba(96,165,250,0.15);   color: #60a5fa; }
+.s_rejected  { background: rgba(239,68,68,0.15);    color: #EF4444; }
+.s_disbursed { background: rgba(167,139,250,0.15);  color: #a78bfa; }
+.s_active    { background: rgba(16,185,129,0.15);   color: #10B981; }
+.s_completed { background: rgba(255,255,255,0.08);  color: rgba(255,255,255,0.50); }
+
+.loanProgress { display: flex; flex-direction: column; gap: 4px; }
+.progressTrack {
+  height: 6px; background: rgba(255,255,255,0.08);
+  border-radius: 3px; overflow: hidden;
+}
+.progressFill {
+  height: 100%; background: #10B981;
+  border-radius: 3px; transition: width 0.4s ease;
+}
+.progressLabels {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: rgba(255,255,255,0.40);
+}
+
+.loanTotal { font-size: 12px; color: rgba(255,255,255,0.35); margin: 0; }
+.loanDate  { font-size: 11px; color: rgba(255,255,255,0.25); margin: 0; }
+
+/* ─── Empty state ─────────────────────────────────────────────────────────── */
+.emptyState {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 12px;
+  border-radius: 16px; border: 1px dashed rgba(255,255,255,0.10);
+  padding: 48px; text-align: center; margin-top: 8px;
+}
+.emptyIcon {
+  width: 48px; height: 48px; border-radius: 9999px;
+  background: rgba(255,255,255,0.05);
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.30);
+}
+.emptyText { font-size: 0.875rem; color: rgba(255,255,255,0.40); margin: 0; }
+.emptyHint { font-size: 0.75rem; color: rgba(255,255,255,0.25); margin: 0; }
