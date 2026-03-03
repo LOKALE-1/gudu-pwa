@@ -1,5 +1,8 @@
 'use client';
 
+// useSearchParams() requires force-dynamic to avoid prerender errors in Next.js 15
+export const dynamic = 'force-dynamic';
+
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signInWithCustomToken } from 'firebase/auth';
