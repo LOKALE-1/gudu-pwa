@@ -1,9 +1,6 @@
 'use client';
 
-// useSearchParams() requires force-dynamic to avoid prerender errors in Next.js 15
-export const dynamic = 'force-dynamic';
-
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { signInWithCustomToken } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
@@ -13,7 +10,7 @@ import styles from './verify.module.css';
 const OTP_LENGTH = 6;
 const VERIFY_OTP_URL = 'https://us-central1-gudu-stokvel.cloudfunctions.net/verifyOtp';
 
-export default function VerifyOtpPage() {
+function VerifyOtpContent() {
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(''));
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
   const router = useRouter();
@@ -186,5 +183,13 @@ export default function VerifyOtpPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function VerifyOtpPage() {
+  return (
+    <Suspense fallback={null}>
+      <VerifyOtpContent />
+    </Suspense>
   );
 }
