@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { useAuth } from '@/context/AuthContext';
 import { db } from '@/lib/firebase';
@@ -23,6 +23,7 @@ function resolveEmail(email: string | null | undefined, phone: string | null | u
 
 export default function ContributePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { state } = useAuth();
   const profile = state.currentProfile;
   const stokvel = state.userStokvels[0] ?? null;
@@ -38,6 +39,15 @@ export default function ContributePage() {
 
   const amount = parseFloat(rawAmount) || 0;
   const canSubmit = amount >= 1 && !isLoading;
+
+  // Resume pending payment when Paystack redirects back with ?ref=
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (ref && stokvel) {
+      setContributionId(ref);
+      setPhase('awaiting-payment');
+    }
+  }, [searchParams, stokvel]);
 
   // Clean up Firestore listener on unmount
   useEffect(() => {
@@ -99,10 +109,9 @@ export default function ContributePage() {
       setConfirmedAmount(amount);
       setIsLoading(false);
 
-      // Open Paystack hosted checkout in a new tab.
-      // Keep this page open — the Firestore onSnapshot listener will detect
-      // completion once the webhook fires and marks the contribution as completed.
-      window.open(authorizationUrl, '_blank', 'noopener');
+      // Navigate to Paystack checkout. Paystack will redirect back to
+      // /contribute?ref={contributionId} when done — the useEffect above resumes the listener.
+      window.location.href = authorizationUrl;
       setPhase('awaiting-payment');
     } catch (err) {
       setIsLoading(false);

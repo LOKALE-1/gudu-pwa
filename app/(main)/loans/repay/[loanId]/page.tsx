@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import {
   doc, getDoc, collection, onSnapshot, updateDoc, serverTimestamp,
 } from 'firebase/firestore';
@@ -40,6 +40,7 @@ function fmt(n: number) {
 export default function RepayPage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const loanId = params.loanId as string;
 
   const { state } = useAuth();
@@ -61,6 +62,15 @@ export default function RepayPage() {
   const [newBalance, setNewBalance] = useState(0);
 
   const listenerRef = useRef<(() => void) | null>(null);
+
+  // ── Resume pending repayment when Paystack redirects back with ?ref= ──────
+  useEffect(() => {
+    const ref = searchParams.get('ref');
+    if (ref && stokvel) {
+      setRepaymentId(ref);
+      setPhase('awaiting-payment');
+    }
+  }, [searchParams, stokvel]);
 
   // ── Load loan ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -158,8 +168,9 @@ export default function RepayPage() {
       });
       listenerRef.current = unsub;
 
-      // Open Paystack checkout in new tab
-      window.open(authorizationUrl, '_blank', 'noopener');
+      // Navigate to Paystack checkout. Paystack redirects back to
+      // /loans/repay/{loanId}?ref={repaymentId} when done.
+      window.location.href = authorizationUrl;
       setPhase('awaiting-payment');
 
     } catch (err) {
