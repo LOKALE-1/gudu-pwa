@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 import { getFunctions, type Functions } from 'firebase/functions';
+import { getMessaging, type Messaging } from 'firebase/messaging';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,8 +13,6 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Guard: only initialize when API key is present.
-// During SSR / build without .env.local values, this prevents Firebase from throwing.
 function createFirebaseApp(): FirebaseApp {
   if (getApps().length > 0) return getApp();
   return initializeApp(firebaseConfig);
@@ -27,5 +26,9 @@ const app: FirebaseApp = firebaseConfig.apiKey
 export const auth: Auth = app ? getAuth(app) : (null as unknown as Auth);
 export const db: Firestore = app ? getFirestore(app) : (null as unknown as Firestore);
 export const functions: Functions = app ? getFunctions(app, 'us-central1') : (null as unknown as Functions);
+
+// Messaging is browser-only — never call on server
+export const messaging: Messaging | null =
+  app && typeof window !== 'undefined' ? getMessaging(app) : null;
 
 export default app;

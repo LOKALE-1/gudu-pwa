@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { NotificationInit } from '@/components/NotificationInit';
 import styles from './main.module.css';
 
 const NAV_ITEMS = [
@@ -78,6 +79,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <div className={styles.shell}>
+      <NotificationInit />
       {/* Desktop sidebar */}
       <aside className={styles.sidebar}>
         <div className={styles.logoRow}>
