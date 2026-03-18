@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { doc, setDoc, updateDoc, arrayUnion, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, arrayUnion, increment, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '@/context/AuthContext';
 import { db } from '@/lib/firebase';
 import type { Profile } from '@/types';
@@ -40,26 +40,61 @@ export default function ProfilePage() {
     setApLoading(true);
     setApError('');
     try {
+      // Check if any existing profile is already in a stokvel — inherit it (mirrors Android)
+      let inheritedStokvelId: string | null = null;
+      for (const p of state.allProfiles ?? []) {
+        if (p.stokvelId) { inheritedStokvelId = p.stokvelId; break; }
+      }
+
       const profileId = `${user.uid}_${Date.now()}`;
+      const now = Date.now();
       const newProfile: Profile = {
         id: profileId,
         userId: user.uid,
         displayName: apDisplayName.trim(),
         surname: apSurname.trim(),
         role: 'MEMBER',
-        stokvelId: null,
+        stokvelId: inheritedStokvelId,
         photoUrl: null,
-        createdAt: Date.now(),
+        createdAt: now,
         stats: { totalContributed: 0, totalBorrowed: 0, outstandingDebt: 0 },
         interestEarned: 0,
       };
+
+      // 1. Create the profile doc
       await setDoc(doc(db, 'profiles', profileId), {
         ...newProfile,
         createdAt: serverTimestamp(),
       });
+
+      // 2. Add profileId to user doc
       await updateDoc(doc(db, 'users', user.uid), {
         profileIds: arrayUnion(profileId),
       });
+
+      // 3. If inheriting a stokvel — add as active member (mirrors Android addAdditionalProfile)
+      if (inheritedStokvelId) {
+        const memberEntry = {
+          profileId,
+          userId: user.uid,
+          displayName: apDisplayName.trim(),
+          surname: apSurname.trim(),
+          role: 'MEMBER',
+          status: 'ACTIVE',
+          joinedAt: now,
+          approvedAt: now,
+        };
+
+        // Add to members subcollection
+        await setDoc(doc(db, 'stokvels', inheritedStokvelId, 'members', profileId), memberEntry);
+
+        // Add to members array + increment memberCount
+        await updateDoc(doc(db, 'stokvels', inheritedStokvelId), {
+          members: arrayUnion(memberEntry),
+          memberCount: increment(1),
+        });
+      }
+
       // Update in-memory allProfiles so switcher shows the new entry immediately
       dispatch({ type: 'SET_ALL_PROFILES', payload: [...(state.allProfiles ?? []), newProfile] });
       setShowAddProfile(false);
