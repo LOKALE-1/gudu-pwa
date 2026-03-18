@@ -525,11 +525,9 @@ export default function LoansPage() {
 
         {tab === 'mine' && (
           <div className={styles.list}>
-            {!hasOpenLoan && (
-              <button className={styles.requestBtnTop} onClick={() => router.push('/loans/request')}>
-                + Request a Loan
-              </button>
-            )}
+            <button className={styles.requestBtnTop} onClick={() => router.push('/loans/request')}>
+              + Request a Loan
+            </button>
             {myLoans.length === 0 ? (
               <div className={styles.emptyState}><p className={styles.emptyTitle}>No loans yet</p></div>
             ) : (
@@ -563,11 +561,9 @@ export default function LoansPage() {
         </div>
       ) : (
         <div className={styles.list}>
-          {!hasOpenLoan && (
-            <button className={styles.requestBtnTop} onClick={() => router.push('/loans/request')}>
-              + Request a Loan
-            </button>
-          )}
+          <button className={styles.requestBtnTop} onClick={() => router.push('/loans/request')}>
+            + Request a Loan
+          </button>
           {myLoans.map(l => <LoanCard key={l.id} loan={l} />)}
         </div>
       )}
