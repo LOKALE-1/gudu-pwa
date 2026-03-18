@@ -51,6 +51,7 @@ export interface Stokvel {
   description: string;
   creatorUserId: string;
   creatorProfileId: string;
+  creatorId?: string; // mirrors Android field — used by Cloud Functions for interest distribution
   inviteCode: string;
   requiresApproval: boolean;
   poolBalance: number;

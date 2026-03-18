@@ -25,6 +25,7 @@ import {
   where,
   getDocs,
   arrayUnion,
+  increment,
 } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import type { AuthState, AuthStep, User, Profile, Stokvel, StokvelMember } from '@/types';
@@ -239,8 +240,29 @@ async function generateUniqueInviteCode(): Promise<string> {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
   const profileListenerRef = useRef<Unsubscribe | null>(null);
+  const stokvelListenerRef = useRef<Unsubscribe | null>(null);
   // Tracks the last known stokvelId so the listener can detect an approval event
   const currentStokvelIdRef = useRef<string | null>(null);
+
+  // ── Profile real-time listener ────────────────────────────────────────────
+  // ── Stokvel real-time listener ─────────────────────────────────────────────
+  // Keeps memberCount, poolBalance, totalContributions live — mirrors Android.
+  const startStokvelListener = useCallback((stokvelId: string) => {
+    if (stokvelListenerRef.current) {
+      stokvelListenerRef.current();
+      stokvelListenerRef.current = null;
+    }
+    stokvelListenerRef.current = onSnapshot(
+      doc(db, 'stokvels', stokvelId),
+      (snapshot) => {
+        if (!snapshot.exists()) return;
+        dispatch({
+          type: 'ADD_STOKVEL',
+          payload: mapStokvelDoc(snapshot.id, snapshot.data()),
+        });
+      }
+    );
+  }, []);
 
   // ── Profile real-time listener ────────────────────────────────────────────
   // Mirrors Android's startProfileListener.
@@ -263,16 +285,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const newStokvelId: string | null = d.stokvelId ?? null;
           const prevStokvelId = currentStokvelIdRef.current;
 
-          // Approval detected — fetch and register the stokvel in state
-          if (newStokvelId && !prevStokvelId) {
-            getDoc(doc(db, 'stokvels', newStokvelId)).then((stokvelSnap) => {
-              if (stokvelSnap.exists()) {
-                dispatch({
-                  type: 'ADD_STOKVEL',
-                  payload: mapStokvelDoc(stokvelSnap.id, stokvelSnap.data()),
-                });
-              }
-            });
+          // Approval detected or stokvel changed — start live stokvel listener
+          if (newStokvelId && newStokvelId !== prevStokvelId) {
+            startStokvelListener(newStokvelId);
+          } else if (!newStokvelId) {
+            // Left stokvel — stop listening
+            if (stokvelListenerRef.current) {
+              stokvelListenerRef.current();
+              stokvelListenerRef.current = null;
+            }
           }
 
           currentStokvelIdRef.current = newStokvelId;
@@ -296,7 +317,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       );
     },
-    []
+    [startStokvelListener]
   );
 
   // ── Load user and proceed to COMPLETED state ───────────────────────────────
@@ -337,6 +358,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
 
         startProfileListener(profile.id);
+
+        // Start live stokvel listener if user already has a stokvel
+        if (profile.stokvelId) {
+          startStokvelListener(profile.stokvelId);
+        }
       } catch (err) {
         console.error('loadUserAndComplete error:', err);
         dispatch({
@@ -346,7 +372,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         dispatch({ type: 'SET_INITIALIZING', payload: false });
       }
     },
-    [startProfileListener]
+    [startProfileListener, startStokvelListener]
   );
 
   // ── Firebase auth state observer ───────────────────────────────────────────
@@ -412,6 +438,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       inviteCode,
       creatorUserId: user.uid,
       creatorProfileId: profile.id,
+      creatorId: profile.id, // matches Android field name — used by Cloud Functions for interest distribution
       requiresApproval: params.requiresApproval,
       poolBalance: 0,
       totalContributions: 0,
@@ -514,7 +541,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (status === 'ACTIVE') {
       // 4a. Update stokvel membership count + array
       await updateDoc(doc(db, 'stokvels', stokvel.id), {
-        memberCount: ((sd.memberCount as number) ?? 0) + 1,
+        memberCount: increment(1),
         members: arrayUnion(memberEntry),
       });
 
@@ -565,8 +592,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       currentStokvelIdRef.current = profile.stokvelId;
       dispatch({ type: 'SWITCH_PROFILE', payload: profile });
       startProfileListener(profile.id);
+      if (profile.stokvelId) startStokvelListener(profile.stokvelId);
     },
-    [startProfileListener]
+    [startProfileListener, startStokvelListener]
   );
 
   // ── Sign out ───────────────────────────────────────────────────────────────
@@ -574,6 +602,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (profileListenerRef.current) {
       profileListenerRef.current();
       profileListenerRef.current = null;
+    }
+    if (stokvelListenerRef.current) {
+      stokvelListenerRef.current();
+      stokvelListenerRef.current = null;
     }
     currentStokvelIdRef.current = null;
     await firebaseSignOut(auth);
