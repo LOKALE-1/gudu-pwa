@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '@/context/AuthContext';
 import { db } from '@/lib/firebase';
 import styles from './request.module.css';
@@ -73,33 +73,7 @@ export default function LoanRequestPage() {
         return;
       }
 
-      // 2. Member must have contributed at least once
-      if ((profile?.stats?.totalContributed ?? 0) <= 0) {
-        setIneligibleReason('You need to make at least one contribution before you can request a loan.');
-        setStep('ineligible');
-        return;
-      }
-
-      // 3. No outstanding loan balance (pending, approved, disbursed, or active)
-      const loansSnap = await getDocs(
-        query(
-          collection(db, 'stokvels', stokvel!.id, 'loans'),
-          where('profileId', '==', profile!.id),
-          where('status', 'in', ['pending', 'approved', 'disbursed', 'active'])
-        )
-      );
-
-      const hasOutstanding = loansSnap.docs.some(d => {
-        const data = d.data();
-        return (data.remainingBalance ?? data.totalAmount ?? 0) > 0;
-      });
-
-      if (hasOutstanding) {
-        setIneligibleReason('You must settle your existing loan before requesting a new one.');
-        setStep('ineligible');
-        return;
-      }
-
+      // Members can request loans regardless of contribution history or existing loans
       setStep('form');
     } catch (err) {
       console.error('Eligibility check failed:', err);

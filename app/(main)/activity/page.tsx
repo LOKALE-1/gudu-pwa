@@ -119,8 +119,19 @@ export default function ActivityPage() {
 
 // ── Tab 1: Transactions ───────────────────────────────────────────────────────
 function TransactionsTab({ stokvel, profile, isAdmin }: { stokvel: any; profile: any; isAdmin: boolean }) {
+  const { state } = useAuth();
   const [items, setItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Build profileId → name map from all known profiles
+  const profileNameMap = (state.allProfiles ?? []).reduce<Record<string, string>>((acc, p) => {
+    acc[p.id] = `${p.displayName} ${p.surname}`;
+    return acc;
+  }, {});
+  function getMemberName(profileId: string): string {
+    if (profileId === profile?.id) return 'You';
+    return profileNameMap[profileId] ?? 'Member';
+  }
 
   useEffect(() => {
     if (!stokvel) { setLoading(false); return; }
@@ -171,7 +182,7 @@ function TransactionsTab({ stokvel, profile, isAdmin }: { stokvel: any; profile:
           </div>
           <div className={styles.itemBody}>
             <p className={styles.itemTitle}>
-              {item.profileId === profile?.id ? 'Your contribution' : 'Member contribution'}
+              {getMemberName(item.profileId)} contribution
             </p>
             <p className={styles.itemDate}>{formatDate(item.createdAt)}</p>
           </div>

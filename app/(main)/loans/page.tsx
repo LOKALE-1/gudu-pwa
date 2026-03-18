@@ -31,6 +31,7 @@ interface Loan {
   transferStatus?: string;
   dueDate?: number;
   missedPayments?: number;
+  lastPenaltyAppliedAt?: { seconds: number } | null;
   createdAt: { seconds: number } | null;
   approvedAt?: { seconds: number } | null;
   disbursedAt?: { seconds: number } | null;
@@ -258,8 +259,13 @@ export default function LoansPage() {
                 Due: {fmtDate(loan.dueDate)}{isOverdue ? ' · OVERDUE' : ''}
               </p>
             )}
-            {isOverdue && (
-              <p className={styles.overdueWarning}>⚠ Overdue — 30% interest will be added</p>
+            {isOverdue && loan.lastPenaltyAppliedAt && (
+              <p className={styles.overdueWarning}>
+                ⚠ Overdue — 30% penalty applied{(loan.missedPayments ?? 0) > 1 ? ` (${loan.missedPayments} times)` : ''}. New balance: R {fmt(loan.remainingBalance)}
+              </p>
+            )}
+            {isOverdue && !loan.lastPenaltyAppliedAt && (
+              <p className={styles.overdueWarning}>⚠ Overdue — 30% penalty will be applied today</p>
             )}
             {/* Admin: Activate button when disbursed but webhook hasn't fired */}
             {showRepay && isDisbursed && (
