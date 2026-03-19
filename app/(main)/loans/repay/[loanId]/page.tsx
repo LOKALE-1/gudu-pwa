@@ -139,7 +139,7 @@ export default function RepayPage() {
           userId: user.uid,
           amount,
           email: 'noreply@gudustokvel.co.za',
-          interestAmount: loan.totalInterest,
+          interestAmount: loan.totalAmount - loan.principal,
           totalLoanAmount: loan.totalAmount,
         }),
       });
