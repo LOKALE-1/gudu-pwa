@@ -148,12 +148,12 @@ export default function PendingMembersPage() {
                 <div key={member.profileId} className={styles.memberCard}>
                   <div className={styles.avatar}>
                     <span className={styles.avatarLetter}>
-                      {member.displayName.charAt(0).toUpperCase()}
+                      {(member.displayName ?? member.profileId ?? '?').charAt(0).toUpperCase()}
                     </span>
                   </div>
                   <div className={styles.memberInfo}>
                     <p className={styles.memberName}>
-                      {member.displayName} {member.surname}
+                      {member.displayName ?? member.profileId} {member.surname ?? ''}
                     </p>
                     <p className={styles.memberMeta}>Requested {joinedDate}</p>
                     <span className={styles.pendingBadge}>Pending</span>
