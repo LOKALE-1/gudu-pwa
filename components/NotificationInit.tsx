@@ -23,12 +23,18 @@ export function NotificationInit() {
 
     async function setup() {
       try {
-        const swReg = await navigator.serviceWorker.ready;
-
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') return;
 
-        // getFirebaseMessaging() is safe here — we're inside useEffect (browser only)
+        // Register sw.js explicitly — FCM needs a service worker registration
+        const swReg = await navigator.serviceWorker.register('/sw.js', {
+          scope: '/',
+          updateViaCache: 'none',
+        });
+
+        // Wait for the SW to be active before calling getToken
+        await navigator.serviceWorker.ready;
+
         const messaging = getFirebaseMessaging();
         if (!messaging) return;
 
