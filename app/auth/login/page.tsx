@@ -2,26 +2,21 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { useAuth } from '@/context/AuthContext';
 import styles from './login.module.css';
 
-const SEND_OTP_URL = 'https://us-central1-gudu-stokvel.cloudfunctions.net/sendOtp';
-
-function cleanPhoneInput(input: string): string {
-  let digits = input.replace(/\D/g, '');
-  if (digits.startsWith('0')) digits = digits.slice(1);
-  if (digits.startsWith('27') && digits.length > 2) digits = digits.slice(2);
-  return digits.slice(0, 9);
-}
-
 export default function LoginPage() {
-  const [phoneDigits, setPhoneDigits] = useState('');
+  const [tab, setTab] = useState<'email' | 'phone'>('email');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
-  const { state, dispatch, clearError } = useAuth();
+  const { state, handlePostVerification } = useAuth();
 
-  const isValid = phoneDigits.length >= 9;
+  const isEmailValid = email.includes('@') && email.includes('.') && password.length >= 6;
 
   useEffect(() => {
     if (state.isAuthenticated && state.authStep === 'COMPLETED') {
@@ -29,28 +24,31 @@ export default function LoginPage() {
     }
   }, [state.isAuthenticated, state.authStep, router]);
 
-  async function handleSendCode() {
-    if (!isValid || isLoading) return;
-    clearError();
+  async function handleSignIn() {
+    if (!isEmailValid || isLoading) return;
+    setError('');
     setIsLoading(true);
-
-    const phone = `+27${phoneDigits}`;
-    dispatch({ type: 'SET_PHONE_NUMBER', payload: phone });
-
     try {
-      const res = await fetch(SEND_OTP_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone }),
-      });
-      const data = await res.json();
-      if (!data.success) throw new Error(data.error ?? 'Failed to send code');
-      dispatch({ type: 'SET_AUTH_STEP', payload: 'OTP_VERIFICATION' });
-      // devCode is returned when no SMS credentials are set — auto-fills the verify page
-      router.push(data.devCode ? `/auth/verify-otp?code=${data.devCode}` : '/auth/verify-otp');
+      await signInWithEmailAndPassword(auth, email, password);
+      await handlePostVerification();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to send code. Try again.';
-      dispatch({ type: 'SET_ERROR', payload: msg });
+      const msg = err instanceof Error ? err.message : 'Sign in failed';
+      setError(msg.replace('Firebase: ', '').replace(/\(auth\/.*\)\.?/, '').trim());
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function handleSignUp() {
+    if (!isEmailValid || isLoading) return;
+    setError('');
+    setIsLoading(true);
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      await handlePostVerification();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Sign up failed';
+      setError(msg.replace('Firebase: ', '').replace(/\(auth\/.*\)\.?/, '').trim());
     } finally {
       setIsLoading(false);
     }
@@ -89,44 +87,91 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <div className={styles.inputGroup}>
-        <label className={styles.label}>Phone number</label>
-        <div className={`${styles.phoneRow}${isFocused ? ` ${styles.focused}` : ''}`}>
-          <span className={styles.countryCode}>+27</span>
-          <div className={styles.rowDivider} />
-          <input
-            type="tel"
-            inputMode="numeric"
-            placeholder="82 123 4567"
-            value={phoneDigits}
-            onChange={(e) => setPhoneDigits(cleanPhoneInput(e.target.value))}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSendCode()}
-            disabled={isLoading}
-            className={styles.phoneInput}
-          />
-          <svg className={`${styles.phoneIcon}${isFocused ? ` ${styles.focused}` : ''}`}
-            width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round"
-              d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Zm6-10.125a1.875 1.875 0 1 1-3.75 0 1.875 1.875 0 0 1 3.75 0Zm1.294 6.336a6.721 6.721 0 0 1-3.17.789 6.721 6.721 0 0 1-3.168-.789 3.376 3.376 0 0 1 6.338 0Z" />
+      {/* Tab toggle */}
+      <div className={styles.tabRow}>
+        <button
+          className={`${styles.tabBtn} ${tab === 'email' ? styles.tabActive : styles.tabInactive}`}
+          onClick={() => setTab('email')}
+        >
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
           </svg>
-        </div>
-        <p className={styles.hint}>Enter your number without the leading 0</p>
+          Email
+        </button>
+        <button
+          className={`${styles.tabBtn} ${tab === 'phone' ? styles.tabActive : styles.tabInactive}`}
+          onClick={() => setTab('phone')}
+        >
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
+          </svg>
+          Phone
+        </button>
       </div>
 
-      {state.error && <div className={styles.error}>{state.error}</div>}
+      {tab === 'phone' ? (
+        <div className={styles.underConstruction}>
+          <div className={styles.constructionIcon}>
+            <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17 17.25 21A2.652 2.652 0 0 0 21 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 1 1-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 0 0 4.486-6.336l-3.276 3.277a3.004 3.004 0 0 1-2.25-2.25l3.276-3.276a4.5 4.5 0 0 0-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437 1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008Z" />
+            </svg>
+          </div>
+          <p className={styles.constructionTitle}>Under Construction</p>
+          <p className={styles.constructionSub}>
+            Phone authentication is coming soon. Please use email to sign in for now.
+          </p>
+        </div>
+      ) : (
+        <div className={styles.emailForm}>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Email address</label>
+            <input
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSignIn()}
+              disabled={isLoading}
+              className={styles.textInput}
+              autoComplete="email"
+            />
+          </div>
+          <div className={styles.inputGroup}>
+            <label className={styles.label}>Password</label>
+            <input
+              type="password"
+              placeholder="Min. 6 characters"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSignIn()}
+              disabled={isLoading}
+              className={styles.textInput}
+              autoComplete="current-password"
+            />
+          </div>
 
-      <button
-        onClick={handleSendCode}
-        disabled={!isValid || isLoading}
-        className={`${styles.ctaBtn} ${isValid && !isLoading ? styles.active : styles.dimmed}`}
-      >
-        {isLoading
-          ? <><div className={styles.spinner} /> Sending code...</>
-          : <>Continue Securely <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></>
-        }
-      </button>
+          {error && <div className={styles.error}>{error}</div>}
+
+          <button
+            onClick={handleSignIn}
+            disabled={!isEmailValid || isLoading}
+            className={`${styles.ctaBtn} ${isEmailValid && !isLoading ? styles.active : styles.dimmed}`}
+          >
+            {isLoading
+              ? <><div className={styles.spinner} /> Signing in...</>
+              : <>Sign In <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></>
+            }
+          </button>
+
+          <button
+            onClick={handleSignUp}
+            disabled={!isEmailValid || isLoading}
+            className={`${styles.outlineBtn} ${isEmailValid && !isLoading ? styles.outlineActive : styles.outlineDimmed}`}
+          >
+            {isLoading ? 'Creating account...' : 'Create Account'}
+          </button>
+        </div>
+      )}
 
       <div className={styles.orRow}>
         <div className={styles.orLine} />

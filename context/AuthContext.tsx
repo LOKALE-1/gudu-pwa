@@ -11,7 +11,10 @@ import React, {
 import {
   onAuthStateChanged,
   signOut as firebaseSignOut,
+  signInWithPhoneNumber,
+  RecaptchaVerifier,
   type Unsubscribe,
+  type ConfirmationResult,
 } from 'firebase/auth';
 import {
   doc,
@@ -140,6 +143,8 @@ interface AuthContextType {
   resetProfileAddedFlag: () => void;
   clearError: () => void;
   handlePostVerification: () => Promise<void>;
+  signInWithPhone: (phoneNumber: string, verifier: RecaptchaVerifier) => Promise<void>;
+  confirmOtp: (otp: string) => Promise<void>;
   createStokvel: (params: CreateStokvelParams) => Promise<{ stokvel: Stokvel; inviteCode: string }>;
   joinStokvel: (inviteCode: string) => Promise<{ status: 'ACTIVE' | 'PENDING'; stokvelName: string }>;
 }
@@ -241,6 +246,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
   const profileListenerRef = useRef<Unsubscribe | null>(null);
   const stokvelListenerRef = useRef<Unsubscribe | null>(null);
+  const confirmationResultRef = useRef<ConfirmationResult | null>(null);
   // Tracks the last known stokvelId so the listener can detect an approval event
   const currentStokvelIdRef = useRef<string | null>(null);
 
@@ -408,6 +414,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'SET_LOADING', payload: true });
     await loadUserAndComplete(firebaseUser.uid);
   }, [loadUserAndComplete]);
+
+  // ── Native Phone Auth ──────────────────────────────────────────────────────
+  const signInWithPhone = useCallback(async (phoneNumber: string, verifier: RecaptchaVerifier) => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'CLEAR_ERROR' });
+    try {
+      const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, verifier);
+      confirmationResultRef.current = confirmationResult;
+      dispatch({ type: 'SET_AUTH_STEP', payload: 'OTP_VERIFICATION' });
+      dispatch({ type: 'SET_PHONE_NUMBER', payload: phoneNumber });
+      dispatch({ type: 'SET_LOADING', payload: false });
+    } catch (err: any) {
+      console.error('signInWithPhone error:', err);
+      dispatch({ type: 'SET_ERROR', payload: err.message || 'Failed to send SMS' });
+      dispatch({ type: 'SET_LOADING', payload: false });
+      throw err;
+    }
+  }, []);
+
+  const confirmOtp = useCallback(async (otp: string) => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'CLEAR_ERROR' });
+    try {
+      if (!confirmationResultRef.current) {
+        throw new Error('No verification in progress. Please try sending the code again.');
+      }
+      await confirmationResultRef.current.confirm(otp);
+      // onAuthStateChanged will handle the rest
+    } catch (err: any) {
+      console.error('confirmOtp error:', err);
+      dispatch({ type: 'SET_ERROR', payload: err.message || 'Invalid verification code' });
+      dispatch({ type: 'SET_LOADING', payload: false });
+      throw err;
+    }
+  }, []);
 
   // ── Create stokvel ─────────────────────────────────────────────────────────
   const createStokvel = useCallback(async (params: CreateStokvelParams) => {
@@ -629,6 +670,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         resetProfileAddedFlag,
         clearError,
         handlePostVerification,
+        signInWithPhone,
+        confirmOtp,
         createStokvel,
         joinStokvel,
       }}
