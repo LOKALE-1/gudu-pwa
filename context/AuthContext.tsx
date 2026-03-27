@@ -95,17 +95,32 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         hasCheckedStokvels: true,
         error: null,
       };
-    case 'UPDATE_PROFILE':
+    case 'UPDATE_PROFILE': {
       if (!state.currentProfile) return state;
+      const updatedProfile = { ...state.currentProfile, ...action.payload };
       return {
         ...state,
-        currentProfile: { ...state.currentProfile, ...action.payload },
+        currentProfile: updatedProfile,
+        // Also sync it to allProfiles so that functions relying on them (like handleAddProfile) see fresh data
+        allProfiles: state.allProfiles?.map(p => 
+          p.id === updatedProfile.id ? updatedProfile : p
+        ) ?? null,
       };
+    }
     case 'SET_STOKVELS':
       return { ...state, userStokvels: action.payload, hasCheckedStokvels: true };
     case 'ADD_STOKVEL': {
-      const already = state.userStokvels.some((s) => s.id === action.payload.id);
-      if (already) return state;
+      const exists = state.userStokvels.some((s) => s.id === action.payload.id);
+      if (exists) {
+        // Upsert — update existing stokvel with fresh data (e.g. memberCount changed)
+        return {
+          ...state,
+          userStokvels: state.userStokvels.map((s) =>
+            s.id === action.payload.id ? action.payload : s
+          ),
+          hasCheckedStokvels: true,
+        };
+      }
       return { ...state, userStokvels: [...state.userStokvels, action.payload], hasCheckedStokvels: true };
     }
     case 'SET_ALL_PROFILES':
@@ -212,19 +227,19 @@ function mapStokvelDoc(id: string, d: Record<string, unknown>): Stokvel {
   };
 }
 
-async function fetchUserStokvels(profileIds: string[]): Promise<Stokvel[]> {
-  if (profileIds.length === 0) return [];
-  const stokvels: Stokvel[] = [];
-  const profileFetches = profileIds.map((pid) => fetchProfile(pid));
-  const profiles = await Promise.all(profileFetches);
+// Accept already-fetched profiles so we don't re-fetch them
+async function fetchStokvelsByProfiles(profiles: (Profile | null)[]): Promise<Stokvel[]> {
   const stokvelIds = [...new Set(
     profiles.flatMap((p) => (p?.stokvelId ? [p.stokvelId] : []))
   )];
-  for (const sid of stokvelIds) {
-    const snap = await getDoc(doc(db, 'stokvels', sid));
-    if (snap.exists()) stokvels.push(mapStokvelDoc(snap.id, snap.data()));
-  }
-  return stokvels;
+  if (stokvelIds.length === 0) return [];
+  // Fetch all stokvels in parallel
+  const snaps = await Promise.all(
+    stokvelIds.map((sid) => getDoc(doc(db, 'stokvels', sid)))
+  );
+  return snaps
+    .filter((s) => s.exists())
+    .map((s) => mapStokvelDoc(s.id, s.data()));
 }
 
 // 6-char invite code — excludes confusable characters (0, O, 1, I) matching Android
@@ -327,33 +342,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   // ── Load user and proceed to COMPLETED state ───────────────────────────────
+  // All Firestore reads are parallelised to minimise latency on app start / return.
   const loadUserAndComplete = useCallback(
     async (uid: string) => {
       try {
+        // Round-trip 1: user doc
         const user = await fetchUserDoc(uid);
 
         if (!user || !user.currentProfileId) {
+          // Brand new sign-up — no profile yet → go to profile setup
           dispatch({ type: 'SET_INITIALIZING', payload: false });
           dispatch({ type: 'SET_LOADING', payload: false });
           dispatch({ type: 'SET_AUTH_STEP', payload: 'PROFILE_SETUP' });
           return;
         }
 
-        const profile = await fetchProfile(user.currentProfileId);
+        // Round-trip 2: current profile + all other profiles — all in parallel
+        const profileIds = user.profileIds.length > 0
+          ? user.profileIds
+          : [user.currentProfileId];
+
+        const allFetched = await Promise.all(profileIds.map(fetchProfile));
+        const allProfiles = allFetched.filter((p): p is Profile => p !== null);
+
+        // Pick the current profile from what we already fetched (no extra roundtrip)
+        const profile =
+          allProfiles.find((p) => p.id === user.currentProfileId) ?? allProfiles[0] ?? null;
 
         if (!profile) {
-          dispatch({ type: 'SET_ERROR', payload: 'Profile not found. Please contact support.' });
+          dispatch({ type: 'SET_AUTH_STEP', payload: 'PROFILE_SETUP' });
           dispatch({ type: 'SET_INITIALIZING', payload: false });
+          dispatch({ type: 'SET_LOADING', payload: false });
           return;
         }
 
-        const allProfiles: Profile[] = [];
-        for (const pid of user.profileIds) {
-          const p = await fetchProfile(pid);
-          if (p) allProfiles.push(p);
-        }
-
-        const userStokvels = await fetchUserStokvels(user.profileIds);
+        // Round-trip 3: stokvels — all in parallel using already-fetched profiles
+        const userStokvels = await fetchStokvelsByProfiles(allProfiles);
 
         // Seed the ref so the listener knows the starting stokvelId
         currentStokvelIdRef.current = profile.stokvelId;
@@ -618,7 +642,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const user = state.user;
     if (!user) return;
     try {
-      const stokvels = await fetchUserStokvels(user.profileIds);
+      const profiles = await Promise.all(user.profileIds.map(fetchProfile));
+      const stokvels = await fetchStokvelsByProfiles(profiles);
       dispatch({ type: 'SET_STOKVELS', payload: stokvels });
     } catch (err) {
       console.error('refreshStokvels error:', err);

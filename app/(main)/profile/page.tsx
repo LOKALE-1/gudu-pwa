@@ -95,8 +95,20 @@ export default function ProfilePage() {
         });
       }
 
-      // Update in-memory allProfiles so switcher shows the new entry immediately
-      dispatch({ type: 'SET_ALL_PROFILES', payload: [...(state.allProfiles ?? []), newProfile] });
+      // Update in-memory state immediately so UI reflects changes without waiting for listener
+      const updatedProfiles = [...(state.allProfiles ?? []), newProfile];
+      dispatch({ type: 'SET_ALL_PROFILES', payload: updatedProfiles });
+
+      // Optimistically bump memberCount on the stokvel in local state
+      if (inheritedStokvelId) {
+        const updatedStokvels = state.userStokvels.map((s) =>
+          s.id === inheritedStokvelId
+            ? { ...s, memberCount: s.memberCount + 1 }
+            : s
+        );
+        dispatch({ type: 'SET_STOKVELS', payload: updatedStokvels });
+      }
+
       setShowAddProfile(false);
       setApDisplayName('');
       setApSurname('');
@@ -151,6 +163,25 @@ export default function ProfilePage() {
               variant={(profile.stats?.outstandingDebt ?? 0) > 0 ? 'error' : undefined}
             />
           </div>
+
+          {/* Earnings shortcut — visible to all members in a stokvel */}
+          {profile.stokvelId && (
+            <button
+              className={styles.earningsBtn}
+              onClick={() => router.push(`/stokvel/members/${profile.id}/earnings`)}
+            >
+              <div className={styles.earningsBtnLeft}>
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round"
+                    d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33" />
+                </svg>
+                <span>My Earnings History</span>
+              </div>
+              <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} className={styles.chevron}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </button>
+          )}
 
           {/* Profile switcher — only shown when the user has multiple profiles */}
           {hasMultipleProfiles && (

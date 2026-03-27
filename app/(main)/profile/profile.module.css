@@ -111,6 +111,30 @@
 .statValueSuccess { color: #10B981; }
 .statValueError   { color: #EF4444; }
 
+/* ─── Earnings shortcut ──────────────────────────────────────────────────────── */
+.earningsBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.20);
+  border-radius: 16px;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+  color: #10B981;
+}
+.earningsBtn:hover { background: rgba(16, 185, 129, 0.15); }
+.earningsBtnLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
 /* ─── Profile switcher ───────────────────────────────────────────────────────── */
 .switcherSection {
   border-radius: 16px;

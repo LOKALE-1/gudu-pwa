@@ -11,46 +11,56 @@ export default function LoginPage() {
   const [tab, setTab] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  // localLoading = only during the Firebase Auth call itself (before onAuthStateChanged fires)
+  const [localLoading, setLocalLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { state, handlePostVerification } = useAuth();
+  const { state } = useAuth();
+
+  // Combined loading = local Firebase call OR AuthContext initialising/loading
+  const isBusy = localLoading || state.isLoading || state.isInitializing;
 
   const isEmailValid = email.includes('@') && email.includes('.') && password.length >= 6;
 
   useEffect(() => {
     if (state.isAuthenticated && state.authStep === 'COMPLETED') {
       router.replace('/dashboard');
+    } else if (state.authStep === 'PROFILE_SETUP') {
+      router.replace('/auth/setup-profile');
     }
   }, [state.isAuthenticated, state.authStep, router]);
 
+  // Clear localLoading once AuthContext takes over (isLoading becomes true)
+  useEffect(() => {
+    if (state.isLoading && localLoading) setLocalLoading(false);
+  }, [state.isLoading, localLoading]);
+
   async function handleSignIn() {
-    if (!isEmailValid || isLoading) return;
+    if (!isEmailValid || isBusy) return;
     setError('');
-    setIsLoading(true);
+    setLocalLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      await handlePostVerification();
+      // onAuthStateChanged in AuthContext handles redirect — setLocalLoading(false)
+      // is handled by the useEffect above once AuthContext sets isLoading=true
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Sign in failed';
       setError(msg.replace('Firebase: ', '').replace(/\(auth\/.*\)\.?/, '').trim());
-    } finally {
-      setIsLoading(false);
+      setLocalLoading(false);
     }
   }
 
   async function handleSignUp() {
-    if (!isEmailValid || isLoading) return;
+    if (!isEmailValid || isBusy) return;
     setError('');
-    setIsLoading(true);
+    setLocalLoading(true);
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-      await handlePostVerification();
+      // onAuthStateChanged fires → AuthContext sets isLoading=true → we clear localLoading
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Sign up failed';
       setError(msg.replace('Firebase: ', '').replace(/\(auth\/.*\)\.?/, '').trim());
-    } finally {
-      setIsLoading(false);
+      setLocalLoading(false);
     }
   }
 
@@ -131,7 +141,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSignIn()}
-              disabled={isLoading}
+              disabled={isBusy}
               className={styles.textInput}
               autoComplete="email"
             />
@@ -144,7 +154,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSignIn()}
-              disabled={isLoading}
+              disabled={isBusy}
               className={styles.textInput}
               autoComplete="current-password"
             />
@@ -154,10 +164,10 @@ export default function LoginPage() {
 
           <button
             onClick={handleSignIn}
-            disabled={!isEmailValid || isLoading}
-            className={`${styles.ctaBtn} ${isEmailValid && !isLoading ? styles.active : styles.dimmed}`}
+            disabled={!isEmailValid || isBusy}
+            className={`${styles.ctaBtn} ${isEmailValid && !isBusy ? styles.active : styles.dimmed}`}
           >
-            {isLoading
+            {isBusy
               ? <><div className={styles.spinner} /> Signing in...</>
               : <>Sign In <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg></>
             }
@@ -165,10 +175,10 @@ export default function LoginPage() {
 
           <button
             onClick={handleSignUp}
-            disabled={!isEmailValid || isLoading}
-            className={`${styles.outlineBtn} ${isEmailValid && !isLoading ? styles.outlineActive : styles.outlineDimmed}`}
+            disabled={!isEmailValid || isBusy}
+            className={`${styles.outlineBtn} ${isEmailValid && !isBusy ? styles.outlineActive : styles.outlineDimmed}`}
           >
-            {isLoading ? 'Creating account...' : 'Create Account'}
+            {isBusy ? 'Please wait...' : 'Create Account'}
           </button>
         </div>
       )}
